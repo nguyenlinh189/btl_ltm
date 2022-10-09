@@ -12,11 +12,12 @@ import java.io.Serializable;
  * @author HP
  */
 public class User implements Serializable{
-    private String username,password;
+    private String username,password,server;
 
-    public User(String username, String password) {
+    public User(String username, String password,String server) {
         this.username = username;
         this.password = password;
+        this.server=server;
     }
 
     public String getUsername() {
@@ -33,6 +34,14 @@ public class User implements Serializable{
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
     }
     
 }

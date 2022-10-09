@@ -1,17 +1,26 @@
 
+import com.sun.xml.internal.messaging.saaj.util.Base64;
+import com.sun.xml.internal.ws.util.StringUtils;
+import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeUtility;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
+import sun.misc.BASE64Decoder;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -51,10 +60,8 @@ public class Login extends javax.swing.JFrame {
         login = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         password = new javax.swing.JPasswordField();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        demo = new javax.swing.JTextArea();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jEditorPane1 = new javax.swing.JEditorPane();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextPane1 = new javax.swing.JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -89,11 +96,7 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
-        demo.setColumns(20);
-        demo.setRows(5);
-        jScrollPane1.setViewportView(demo);
-
-        jScrollPane2.setViewportView(jEditorPane1);
+        jScrollPane3.setViewportView(jTextPane1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -113,18 +116,16 @@ public class Login extends javax.swing.JFrame {
                             .addComponent(Server, javax.swing.GroupLayout.Alignment.LEADING, 0, 243, Short.MAX_VALUE)
                             .addComponent(password, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(191, 191, 191)
-                        .addComponent(jLabel3))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(119, 119, 119)
                         .addComponent(login, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(45, 45, 45)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(115, 115, 115)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap())
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(191, 191, 191)
+                        .addComponent(jLabel3)))
+                .addGap(71, 71, 71)
+                .addComponent(jScrollPane3)
+                .addGap(25, 25, 25))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -132,84 +133,131 @@ public class Login extends javax.swing.JFrame {
                 .addGap(53, 53, 53)
                 .addComponent(jLabel3)
                 .addGap(38, 38, 38)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel1)
-                                .addComponent(username, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGap(49, 49, 49)
-                            .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jLabel2))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(44, 44, 44)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(Server, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4))
-                        .addGap(57, 57, 57)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(login)
-                            .addComponent(jButton2)))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(18, Short.MAX_VALUE))
+                            .addComponent(jLabel1)
+                            .addComponent(username, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(49, 49, 49)
+                        .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel2))
+                .addGap(44, 44, 44)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(Server, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addGap(57, 57, 57)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(login)
+                    .addComponent(jButton2))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(35, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 487, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(29, 29, 29))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void loginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginActionPerformed
-        // TODO add your handling code here:
+// TODO add your handling code here:
         String username = this.username.getText();
         String password = this.password.getText();
-        User user=new User(username, password);
         String server = (String) Server.getSelectedItem();
+        User user = new User(username, password, server);
         System.out.println(username + " " + password + " " + server);
         String host = "";
-        if (server.equalsIgnoreCase("gmail")) {
-            host = "pop.gmail.com";
+        if (server.equalsIgnoreCase("gmail")) {// su dung imap
+            host = "imap.gmail.com";
         } else {
             host = "outlook.office365.com";
         }
 
         Properties props = new Properties();
-        props.setProperty("mail.store.protocol", "pop3s");
+        props.setProperty("mail.store.protocol", "imaps");
+        props.setProperty("mail.imaps.host", host);
+        props.setProperty("mail.imaps.port", "993");
         try {
             Session session = Session.getInstance(props, null);
             Store store = session.getStore();
-            store.connect(host, 995, username, password);
-            Folder inbox = store.getFolder("INBOX");
-            inbox.open(Folder.READ_ONLY);
-            Message[] msg = inbox.getMessages();
-            (new Home(user, msg)).setVisible(true);
+            store.connect(username, password);
+//            Folder inbox = store.getFolder("INBOX");// lấy danh sách các mail trên server về để đọc
+//            inbox.open(Folder.READ_ONLY);
+//            Message[] listMessages = inbox.getMessages();
+            (new Home(user, props)).setVisible(true);
             this.dispose();
-//            for (int i = 0; i <=0; i++) {
-//                Message ms = msg[i];
-//                Address[] in = ms.getFrom();
-//                for (Address address : in) {
-//                    String add = address.toString();
-//                    add = add.replaceAll("\"", "");
-//                    System.out.println("FROM:" + MimeUtility.decodeText(add));
+//            for (int i = 0; i <= 0; i++) {
+//                Message msg = listMessages[i];
+//                
+//                Address[] fromAddress = msg.getFrom();// trar ve danh sach nguoi gui trong thuoc tinh from cua thu
+//                String from = fromAddress[0].toString();
+//                from = MimeUtility.decodeText(from.replaceAll("\"", ""));
+//
+//                String subject = msg.getSubject();// lay chu de cua thu
+//                String toList = parseAddresses(msg.getRecipients(Message.RecipientType.TO));// lấy địa chỉ người cũng nhận được thư.có thể ở dạng TO hoặc CC
+//                String ccList = parseAddresses(msg.getRecipients(Message.RecipientType.CC));
+//                String sentDate = msg.getSentDate().toString();
+//                String contentType = msg.getContentType();
+//                String messageContent = "";
+//                String attachFiles = "";
+//                System.out.println(msg.getContentType());
+//                if (contentType.contains("multipart")) {
+//                    Multipart multipart = (Multipart) msg.getContent();
+//                    System.out.println(multipart.getCount());
+//                    for (int j = 0; j < multipart.getCount(); j++) {
+//                        MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(j);
+//                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) // day la phan tep duoc dinh kem
+//                        {
+////                            String fileName = part.getFileName();
+////                            System.out.println(fileName);
+////                            attachFiles += fileName + ", ";
+////                            part.saveFile("C:/Users/HP/OneDrive/Desktop/ltm" + File.separator + fileName);
+//                        } else {
+//                            // day la phan noi dung
+//                            messageContent = part.getContent().toString();
+//                        }
+//                    }
+//                    // co the co nhieu file dinh kem
+//                    if (attachFiles.length() > 1) {
+//                        attachFiles = attachFiles.substring(0, attachFiles.length() - 2);
+//                    }
+//                } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
+//                    Object content = msg.getContent();
+//                    if (content != null) {
+//                        messageContent = content.toString();
+//                    }
 //                }
-//                System.out.println(ms.getContentType());
-//                Multipart mp = (Multipart) ms.getContent();
-//                BodyPart bp = mp.getBodyPart(0);
-//                System.out.println("SENT DATE:" + ms.getSentDate());
-//                System.out.println("SUBJECT:" + ms.getSubject());
-//                System.out.println("CONTENT:" + bp.getContent());
-//                demo.setText(bp.getContent().toString());
-//                jEditorPane1.setContentType("text/html");
-//                jEditorPane1.setText(bp.getContent().toString());
+//                System.out.println("Messgae " + i + ":");
+//                System.out.println("From: " + from);
+//                System.out.println("TO:" + toList);
+//                System.out.println("CC" + ccList);
+//                System.out.println("Subject: " + subject);
+//                System.out.println("Sent date: " + sentDate);
+//                System.out.println("Message: " + messageContent);
+//                System.out.println("File: " + attachFiles);
+//                jTextPane1.setContentType("text/html");
 //            }
-        } catch (MessagingException e) {
-            System.out.println(e);
-            JOptionPane.showMessageDialog(this, "Incorrect username and/or password!");
-        } //catch (IOException e) {
-//            System.out.println(e);
-//        }
+//            inbox.close(false);
+            store.close();
+        } catch (MessagingException ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "username or/and password incorrect");
+        } catch (IOException ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_loginActionPerformed
-
+    private String parseAddresses(Address[] address) {
+        String listAddress = "";
+        if (address != null) {
+            for (int i = 0; i < address.length; i++) {
+                listAddress += address[i].toString() + ", ";
+            }
+        }
+        if (listAddress.length() > 1) {
+            listAddress = listAddress.substring(0, listAddress.length() - 2);// loai bo dau , o cuoi chuoi
+        }
+        return listAddress;
+    }
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         System.exit(0);
@@ -232,13 +280,17 @@ public class Login extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Login.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Login.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Login.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Login.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -252,17 +304,20 @@ public class Login extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> Server;
-    private javax.swing.JTextArea demo;
     private javax.swing.JButton jButton2;
-    private javax.swing.JEditorPane jEditorPane1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTextPane jTextPane1;
     private javax.swing.JButton login;
     private javax.swing.JPasswordField password;
     private javax.swing.JTextField username;
     // End of variables declaration//GEN-END:variables
 }
+//hfhembkjsbewnhlp
+//pmbtpbcxqqppbhvj
+// nguyenthilinh19821@gmail.com
+// banhtrangmamruoc000@gmail.com
+// linhnt.b19cn378@stu.ptit.edu.vn
